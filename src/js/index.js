@@ -12,7 +12,7 @@ const searchFormEl = document.querySelector('.search-form');
 const galleryListEl = document.querySelector('.gallery');
 const loadMoreBtnEl = document.querySelector('.load-more');
 
-let page = 1;
+let page;
 let searchQuery = '';
 let amountCards = 0;
 var gallery = new SimpleLightbox('.photo-card a');
@@ -22,13 +22,14 @@ loadMoreBtnEl.addEventListener('click', handleLoadMoreBtnClick)
 
 async function handleSearchFormSubmit(event) {
     event.preventDefault();
+    loadMoreBtnEl.classList.add('is-hidden');
     galleryListEl.innerHTML = '';
+    page = 1;
     searchQuery = event.target.elements.searchQuery.value.trim();
     console.log(searchQuery);
    
     if (searchQuery === '') {
         Notiflix.Notify.info('Please, enter a search word.');
-        loadMoreBtnEl.classList.add('is-hidden');
         return
     }
     try {
@@ -39,7 +40,6 @@ async function handleSearchFormSubmit(event) {
             console.log(totalHits);
             if (amountCards === 0) {
                 Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.')
-                loadMoreBtnEl.classList.add('is-hidden');
                 return
             }
             Notiflix.Notify.success(`Hooray! We found ${totalHits} images.`);
@@ -56,8 +56,8 @@ async function handleSearchFormSubmit(event) {
 }
 
 async function handleLoadMoreBtnClick() {
-    page += 1;
     try {
+        page += 1;
         const { hits, totalHits } = await fetchFotos(searchQuery, page);
         amountCards += hits.length;
         console.log({hits, totalHits});
@@ -67,15 +67,12 @@ async function handleLoadMoreBtnClick() {
         galleryListEl.insertAdjacentHTML('beforeend', createGalleryCards({ hits }));
         gallery.refresh();
         addSmoothScroll();
-        if (amountCards < totalHits) {
-            loadMoreBtnEl.classList.remove('is-hidden');
-        } else if (amountCards === totalHits) {
-                Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
-                loadMoreBtnEl.classList.add('is-hidden');
-                searchQuery = '';
-                page = 1;
-                return
+        if (amountCards >= totalHits) {
+            Notiflix.Notify.info("We're sorry, but you've reached the end of search results.");
+            loadMoreBtnEl.classList.add('is-hidden');
+            return
         }
+        loadMoreBtnEl.classList.remove('is-hidden');
     } catch (error) {
         console.log(error);
         }
