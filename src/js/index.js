@@ -26,7 +26,6 @@ async function handleSearchFormSubmit(event) {
     galleryListEl.innerHTML = '';
     page = 1;
     searchQuery = event.target.elements.searchQuery.value.trim();
-    console.log(searchQuery);
    
     if (searchQuery === '') {
         Notiflix.Notify.info('Please, enter a search word.');
@@ -35,9 +34,6 @@ async function handleSearchFormSubmit(event) {
     try {
         const { hits, totalHits } = await fetchFotos(searchQuery, page);
             amountCards = hits.length;
-            console.log({ hits, totalHits });
-            console.log(amountCards);
-            console.log(totalHits);
             if (amountCards === 0) {
                 Notiflix.Notify.failure('Sorry, there are no images matching your search query. Please try again.')
                 return
@@ -56,14 +52,10 @@ async function handleSearchFormSubmit(event) {
 }
 
 async function handleLoadMoreBtnClick() {
+    page += 1;
     try {
-        page += 1;
         const { hits, totalHits } = await fetchFotos(searchQuery, page);
         amountCards += hits.length;
-        console.log({hits, totalHits});
-        console.log(page);
-        console.log(amountCards);
-        console.log(totalHits);
         galleryListEl.insertAdjacentHTML('beforeend', createGalleryCards({ hits }));
         gallery.refresh();
         addSmoothScroll();
